@@ -97,7 +97,11 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({
               <div>
                 <p className="text-sm text-gray-500">Authors</p>
                 <p className="font-medium text-gray-900">
-                  {book.authors.map(a => a.name).join(', ')}
+                  {book.authors && book.authors.length > 0
+                  ? typeof book.authors[0] === 'string'
+                  ? book.authors.join(', ')
+                  : book.authors.map(a => a.name).join(', ')
+                  : 'N/A'}
                 </p>
               </div>
             </div>
@@ -131,7 +135,11 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({
                 <BookMarked className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium text-gray-900">{book.category.name}</p>
+                  <p className="font-medium text-gray-900">
+                   {typeof book.category === 'string'
+                     ? book.category
+                     : book.category?.name || 'N/A'}
+                  </p>
                 </div>
               </div>
             )}
@@ -141,7 +149,11 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({
                 <BookOpen className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Publisher</p>
-                  <p className="font-medium text-gray-900">{book.publisher.name}</p>
+                  <p className="font-medium text-gray-900">
+                   {typeof book.publisher === 'string'
+                    ? book.publisher
+                    : book.publisher?.name || 'N/A'}
+                  </p>
                 </div>
               </div>
             )}

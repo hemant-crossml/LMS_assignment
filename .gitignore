@@ -43,3 +43,4 @@ Thumbs.db
 library-frontend/node_modules/
 library-frontend/.next/
 library-frontend/.env.local
+*.tsbuildinfo

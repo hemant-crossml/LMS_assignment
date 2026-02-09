@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
@@ -10,7 +9,6 @@ import Link from 'next/link';
 
 export default function Home() {
   const { isAuthenticated, isLoading, fetchUser } = useAuthStore();
-  const router = useRouter();
 
   useEffect(() => {
     fetchUser();
@@ -22,11 +20,6 @@ export default function Home() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
-  }
-
-  if (isAuthenticated) {
-    router.push('/books');
-    return null;
   }
 
   return (
@@ -45,16 +38,26 @@ export default function Home() {
               reservations, and circulation management
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
-                <Button variant="secondary" size="lg" className="min-w-[200px]">
-                  Get Started
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="outline" size="lg" className="min-w-[200px] bg-white text-primary-600 hover:bg-primary-50">
-                  Sign In
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/books">
+                  <Button variant="secondary" size="lg" className="min-w-[200px]">
+                    Browse Books
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/register">
+                    <Button variant="secondary" size="lg" className="min-w-[200px]">
+                      Get Started
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button variant="outline" size="lg" className="min-w-[200px] bg-white text-primary-600 hover:bg-primary-50">
+                      Sign In
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -131,11 +134,19 @@ export default function Home() {
           <p className="text-xl text-primary-100 mb-8">
             Join thousands of libraries using LibraryMS for efficient management
           </p>
-          <Link href="/register">
-            <Button variant="secondary" size="lg">
-              Create Your Account Today
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/books">
+              <Button variant="secondary" size="lg">
+                Start Browsing Books
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/register">
+              <Button variant="secondary" size="lg">
+                Create Your Account Today
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

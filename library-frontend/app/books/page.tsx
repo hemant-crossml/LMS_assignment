@@ -14,73 +14,54 @@ import api from '@/lib/api';
 export default function BooksPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, fetchUser } = useAuthStore();
+
   const [books, setBooks] = useState<Book[]>([]);
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // ✅ FILTER STATES
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [language, setLanguage] = useState('');
+
+  // Fetch user
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
 
+  // Auth guard
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/login');
-    } else if (isAuthenticated) {
-      fetchBooks();
     }
   }, [isAuthenticated, isLoading, router]);
 
+  // ✅ FETCH BOOKS FROM BACKEND (with filters)
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchBooks();
+    }
+  }, [isAuthenticated, search, category, language]);
+
   const fetchBooks = async () => {
     try {
-      const response = await api.get<Book[]>('/books/');
+      setLoading(true);
+
+      const response = await api.get<Book[]>('/books/', {
+        params: {
+          search: search || undefined,
+          category: category || undefined, // ✅ MUST be "category"
+          language: language || undefined,
+        },
+      });
+
       setBooks(response.data);
-      setFilteredBooks(response.data);
     } catch (error) {
       console.error('Failed to fetch books:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSearch = (query: string) => {
-    if (!query) {
-      setFilteredBooks(books);
-      return;
-    }
-
-    const filtered = books.filter(
-      (book) =>
-        book.title.toLowerCase().includes(query.toLowerCase()) ||
-        book.isbn.toLowerCase().includes(query.toLowerCase()) ||
-        book.authors.some((author) =>
-          author.name.toLowerCase().includes(query.toLowerCase())
-        )
-    );
-    setFilteredBooks(filtered);
-  };
-
-  const handleCategoryFilter = (categoryId: string) => {
-    if (!categoryId) {
-      setFilteredBooks(books);
-      return;
-    }
-
-    const filtered = books.filter(
-      (book) => book.category?.id === parseInt(categoryId)
-    );
-    setFilteredBooks(filtered);
-  };
-
-  const handleLanguageFilter = (language: string) => {
-    if (!language) {
-      setFilteredBooks(books);
-      return;
-    }
-
-    const filtered = books.filter((book) => book.language === language);
-    setFilteredBooks(filtered);
   };
 
   const handleBookClick = (book: Book) => {
@@ -103,25 +84,27 @@ export default function BooksPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
+
       <PageHeader
         title="Browse Books"
         description="Explore our collection of books and reserve your favorites"
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        {/* ✅ FILTERS */}
         <BookFilters
-          onSearch={handleSearch}
-          onCategoryChange={handleCategoryFilter}
-          onLanguageChange={handleLanguageFilter}
+          onSearch={setSearch}
+          onCategoryChange={setCategory}
+          onLanguageChange={setLanguage}
         />
 
-        {filteredBooks.length === 0 ? (
+        {books.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No books found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredBooks.map((book) => (
+            {books.map((book) => (
               <BookCard
                 key={book.id}
                 book={book}

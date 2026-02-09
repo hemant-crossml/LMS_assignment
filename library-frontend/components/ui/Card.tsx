@@ -1,21 +1,21 @@
 import React from 'react';
 import { cn } from '@/utils/helpers';
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
   hoverable?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className, hoverable = false }) => {
+export const Card: React.FC<CardProps> = ({ children, className, hoverable = false, ...props }) => {
+  const combinedClassName = cn(
+    'bg-white rounded-xl shadow-md overflow-hidden',
+    hoverable && 'hover:shadow-xl transition-shadow duration-300',
+    className
+  );
+
   return (
-    <div
-      className={cn(
-        'bg-white rounded-xl shadow-md overflow-hidden',
-        hoverable && 'hover:shadow-xl transition-shadow duration-300',
-        className
-      )}
-    >
+    <div {...props} className={combinedClassName}>
       {children}
     </div>
   );

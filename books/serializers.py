@@ -25,8 +25,10 @@ class BookSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     publisher = PublisherSerializer(read_only=True)
-    available_copies_count = serializers.IntegerField(read_only=True)
-    total_copies_count = serializers.IntegerField(read_only=True)
+    
+    # ⭐ CHANGE THESE LINES - Use SerializerMethodField instead of IntegerField
+    available_copies_count = serializers.SerializerMethodField()
+    total_copies_count = serializers.SerializerMethodField()
     
     # Write fields
     author_ids = serializers.ListField(
@@ -38,6 +40,14 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = '__all__'
+    
+    def get_available_copies_count(self, obj):
+        """Return count of available book copies"""
+        return obj.copies.filter(is_available=True).count()
+    
+    def get_total_copies_count(self, obj):
+        """Return total count of book copies"""
+        return obj.copies.count()
 
     def create(self, validated_data):
         author_ids = validated_data.pop('author_ids', [])
@@ -60,9 +70,27 @@ class BookListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for list views"""
     authors = serializers.StringRelatedField(many=True)
     category = serializers.StringRelatedField()
-    available_copies_count = serializers.IntegerField(read_only=True)
-    
+
+    available_copies_count = serializers.SerializerMethodField()
+    total_copies_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Book
-        fields = ['id', 'title', 'isbn', 'authors', 'category', 
-                  'publication_year', 'cover_image', 'available_copies_count']
+        fields = [
+            'id',
+            'title',
+            'isbn',
+            'authors',
+            'category',
+            'publication_year',
+            'language',          
+            'cover_image',
+            'available_copies_count',
+            'total_copies_count'
+        ]
+
+    def get_available_copies_count(self, obj):
+        return obj.copies.filter(is_available=True).count()
+
+    def get_total_copies_count(self, obj):
+        return obj.copies.count()
