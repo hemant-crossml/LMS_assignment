@@ -36,7 +36,21 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    onSearch(value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // When Enter is pressed, trigger a search (don't submit forms)
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      onSearch(searchQuery.trim());
+      return;
+    }
+
+    // Prevent parent/global handlers from intercepting normal typing
+    if (/^[a-zA-Z]$/.test(e.key)) {
+      e.stopPropagation();
+    }
   };
 
   return (
@@ -48,15 +62,23 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Search */}
-        <div className="relative">
+        <div className="relative flex items-center">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
             placeholder="Search books..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="pl-10"
+            onKeyDown={handleKeyDown}
+            className="pl-10 pr-20"
           />
+          <button
+            type="button"
+            onClick={() => onSearch(searchQuery.trim())}
+            className="absolute right-2 bg-primary-600 text-white px-3 py-1 rounded-md hover:bg-primary-700"
+          >
+            Search
+          </button>
         </div>
 
         {/* Category Filter */}
