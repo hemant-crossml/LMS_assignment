@@ -93,9 +93,11 @@ export default function BooksPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {/* ✅ FILTERS */}
         <BookFilters
-          onSearch={setSearch}
-          onCategoryChange={setCategory}
-          onLanguageChange={setLanguage}
+          onApply={({ search: s, category: c, language: l }) => {
+            setSearch(s || '');
+            setCategory(c || '');
+            setLanguage(l || '');
+          }}
         />
 
         {books.length === 0 ? (

@@ -7,18 +7,14 @@ import api from '@/lib/api';
 import { Category } from '@/types';
 
 interface BookFiltersProps {
-  onSearch: (query: string) => void;
-  onCategoryChange: (categoryId: string) => void;
-  onLanguageChange: (language: string) => void;
+  onApply: (filters: { search: string; category: string; language: string }) => void;
 }
 
-export const BookFilters: React.FC<BookFiltersProps> = ({
-  onSearch,
-  onCategoryChange,
-  onLanguageChange,
-}) => {
+export const BookFilters: React.FC<BookFiltersProps> = ({ onApply }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -39,15 +35,13 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // When Enter is pressed, trigger a search (don't submit forms)
+    // Prevent Enter from submitting parent forms or triggering global handlers
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
-      onSearch(searchQuery.trim());
       return;
     }
 
-    // Prevent parent/global handlers from intercepting normal typing
     if (/^[a-zA-Z]$/.test(e.key)) {
       e.stopPropagation();
     }
@@ -74,7 +68,13 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           />
           <button
             type="button"
-            onClick={() => onSearch(searchQuery.trim())}
+            onClick={() =>
+              onApply({
+                search: searchQuery.trim(),
+                category: selectedCategory,
+                language: selectedLanguage,
+              })
+            }
             className="absolute right-2 bg-primary-600 text-white px-3 py-1 rounded-md hover:bg-primary-700"
           >
             Search
@@ -85,7 +85,10 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         <div>
           <select
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            onChange={(e) => onCategoryChange(e.target.value)}
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+            }}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -100,7 +103,10 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         <div>
           <select
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            onChange={(e) => onLanguageChange(e.target.value)}
+            value={selectedLanguage}
+            onChange={(e) => {
+              setSelectedLanguage(e.target.value);
+            }}
           >
             <option value="">All Languages</option>
             <option value="English">English</option>
